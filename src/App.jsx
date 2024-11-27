@@ -6,7 +6,9 @@ import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import Header from "./components/Layouts/Header";
 import { useState, useEffect } from "react";
-import { AuthContext } from "./context/authContext";
+import { AuthContext } from "./context/authContext"; //untuk berbagi data autentifikasi di seluruh komponen aplikasi  
+import ProductList from "./components/product/ProductList";
+import ProductForm from "./components/product/ProductForm";
 
 export default function App() {
   const [accessToken, setAccessToken] = useState(JSON.parse(localStorage.getItem('currentToken')));
@@ -37,6 +39,9 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/product" element={<ProductList />} />
+          <Route path="/product/add" element={<ProductForm />} />
+          <Route path="/product/edit/:id" element={<ProductForm />} />
         </Routes>
       </BrowserRouter>
     </AuthContext.Provider>

@@ -18,7 +18,7 @@ export default function Register() {
 
 
   useEffect(() => {
-    if(accessToken) navigate('/');
+    if(accessToken) navigate('/login');
   }, [accessToken, navigate])
 
   async function handleSubmit(e){

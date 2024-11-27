@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/authContext";
 import { BASE_URL, getConfig } from "../../helpers/config";
 import axios from "axios";
@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 
 export default function Header() {
   const { accessToken, setAccessToken, currentUser, setCurrentUser} = useContext(AuthContext);
+  const navigate = useNavigate();
 
   async function logoutUser() {
     try {
@@ -15,6 +16,7 @@ export default function Header() {
       setCurrentUser(null);
       setAccessToken('');
       toast.success(response.data.message)
+      navigate('/')
     } catch (error) {
       if(error?.response?.status === 401) {
         localStorage.removeItem('currentToken');
@@ -34,14 +36,14 @@ export default function Header() {
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            <li className="nav-item">
-              <Link className="nav-link active" aria-current="page" to="/">
-                <i className="bi bi-house"></i>Home
-              </Link>
-            </li>
             {
               currentUser ?
               <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/product">
+                    <i className="bi bi-basket"></i>Product
+                  </Link>
+                </li>
                 <li className="nav-item">
                   <Link className="nav-link" to="#">
                     <i className="bi bi-person"></i>{currentUser?.name}
@@ -55,6 +57,11 @@ export default function Header() {
               </>
               :
               <>
+                <li className="nav-item">
+                  <Link className="nav-link active" aria-current="page" to="/">
+                    <i className="bi bi-house"></i>Home
+                  </Link>
+                </li>
                 <li className="nav-item">
                   <Link className="nav-link" to="/login">
                     <i className="bi bi-person-fill-up"></i>Login

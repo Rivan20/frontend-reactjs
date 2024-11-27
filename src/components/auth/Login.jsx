@@ -16,7 +16,7 @@ export default function Login() {
   const { accessToken, setAccessToken, setCurrentUser} = useContext(AuthContext);
 
   useEffect(() => {
-    if(accessToken) navigate('/');
+    if(accessToken) navigate('/product');
   }, [accessToken, navigate])
 
   async function handleSubmit(e){
@@ -38,7 +38,7 @@ export default function Login() {
           setEmail('');
           setPassword('');
           toast.success(response.data.message);
-          navigate('/');
+          navigate('/product');
       }
     } catch (error) {
       setLoading(false);
