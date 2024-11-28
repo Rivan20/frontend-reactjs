@@ -10,11 +10,25 @@ export default function ProductList() {
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [sortedProducts, setSortedProducts] = useState([]); 
+  const [sortedProducts, setSortedProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(''); 
+  const [filteredProducts, setFilteredProducts] = useState([]); 
 
   useEffect(() => {
     getProducts();
   }, [])
+
+  useEffect(() => {
+    const filtered = sortedProducts.filter((product) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        product.name.toLowerCase().includes(query) ||
+        product.stock.toString().includes(query) ||
+        product.price.toString().includes(query)
+      );
+    });
+    setFilteredProducts(filtered);
+  }, [searchQuery, sortedProducts]);
   
   async function onDeleteClick(product) {
     if (!window.confirm(`Are you sure you want to delete the product "${product.name}"?`)) {
@@ -37,6 +51,7 @@ export default function ProductList() {
       const response = await axios.get(`${BASE_URL}/products`);
       setProducts(response.data.data || []); 
       setSortedProducts(response.data.data || []);
+      setFilteredProducts(response.data.data || []);
     } catch (error) {
       console.error(
         error.response?.data?.message
@@ -56,6 +71,15 @@ export default function ProductList() {
             <i className="bi bi-plus-circle"></i> Add Product
           </Link>
         </div>
+      </div>
+      <div className="mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search by name, stock, or price..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)} // Update kata kunci pencarian
+        />
       </div>
       <div className="card shadow-sm">
         <div className="card-body">
@@ -78,8 +102,8 @@ export default function ProductList() {
                     </div>
                   </td>
                 </tr>
-              ) : sortedProducts.length > 0 ? (
-                sortedProducts.map((product, index) => (
+              ) : filteredProducts.length > 0 ? (
+                filteredProducts.map((product, index) => (
                   <tr key={product.id}>
                     <td>{index + 1}</td>
                     <td>{product.name}</td>
