@@ -1,22 +1,21 @@
 import axios from "axios";
-import { useEffect } from "react";
-import { useState } from "react"
+import { useEffect, useState } from "react";
 import { BASE_URL } from "../../helpers/config";
 import { Link } from "react-router-dom";
 import SortBy from "./SortyBy";
 
-
 export default function ProductList() {
-
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sortedProducts, setSortedProducts] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(''); 
-  const [filteredProducts, setFilteredProducts] = useState([]); 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
 
   useEffect(() => {
     getProducts();
-  }, [])
+  }, []);
 
   useEffect(() => {
     const filtered = sortedProducts.filter((product) => {
@@ -29,33 +28,30 @@ export default function ProductList() {
     });
     setFilteredProducts(filtered);
   }, [searchQuery, sortedProducts]);
-  
-  async function onDeleteClick(product) {
-    if (!window.confirm(`Are you sure you want to delete the product "${product.name}"?`)) {
-      return;
-    }
+
+  async function handleDelete() {
+    if (!productToDelete) return;
+
     axios
-      .delete(`${BASE_URL}/products/${product.id}`)
+      .delete(`${BASE_URL}/products/${productToDelete.id}`)
       .then(() => {
         getProducts();
+        setShowModal(false);
       })
       .catch((error) => {
         console.error(error.response?.data?.message);
       });
-
   }
 
   async function getProducts() {
     setLoading(true);
     try {
       const response = await axios.get(`${BASE_URL}/products`);
-      setProducts(response.data.data || []); 
+      setProducts(response.data.data || []);
       setSortedProducts(response.data.data || []);
       setFilteredProducts(response.data.data || []);
     } catch (error) {
-      console.error(
-        error.response?.data?.message
-      );
+      console.error(error.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -78,7 +74,7 @@ export default function ProductList() {
           className="form-control"
           placeholder="Search by name, stock, or price..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)} // Update kata kunci pencarian
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
       <div className="card shadow-sm">
@@ -110,11 +106,17 @@ export default function ProductList() {
                     <td>{product.stock}</td>
                     <td>{product.price}</td>
                     <td>
-                      <Link to={`/product/edit/${product.id}`} className="btn btn-sm btn-primary me-2">
+                      <Link
+                        to={`/product/edit/${product.id}`}
+                        className="btn btn-sm btn-primary me-2"
+                      >
                         <i className="bi bi-pencil-square"></i> Edit
                       </Link>
                       <button
-                        onClick={() => onDeleteClick(product)}
+                        onClick={() => {
+                          setShowModal(true);
+                          setProductToDelete(product);
+                        }}
                         className="btn btn-sm btn-danger"
                       >
                         <i className="bi bi-trash"></i> Delete
@@ -124,13 +126,59 @@ export default function ProductList() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center">No products available.</td>
+                  <td colSpan="5" className="text-center">
+                    No products available.
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
+      {showModal && (
+        <div
+          className="modal fade show"
+          style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          tabIndex="-1"
+          role="dialog"
+        >
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Delete Confirmation</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModal(false)}
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>
+                  Are you sure you want to delete the product{" "}
+                  <strong>{productToDelete?.name}</strong>?
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={handleDelete}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
